@@ -134,4 +134,68 @@
         <button id="confirm-register-btn">确认注册</button>
         <a href="/" class="button-link secondary-btn">返回登录</a>
     </div>
+       <script>
+        // --- 获取DOM元素 ---
+        const messageDisplay = document.getElementById('message-display');
+        const registerUsernameInput = document.getElementById('register-username');
+        const registerNameInput = document.getElementById('register-name');
+        const registerPasswordInput = document.getElementById('register-password');
+        const confirmRegisterBtn = document.getElementById('confirm-register-btn');
+
+        // --- 辅助函数：显示消息 ---
+        function displayMessage(msg, isError = false) {
+            messageDisplay.textContent = msg;
+            messageDisplay.classList.remove('success', 'error');
+            if (msg) {
+                messageDisplay.classList.add(isError ? 'error' : 'success');
+                messageDisplay.style.display = 'block';
+            } else {
+                messageDisplay.style.display = 'none';
+            }
+        }
+
+        // --- 处理注册逻辑 ---
+        async function handleRegister() {
+            const username = registerUsernameInput.value.trim();
+            const name = registerNameInput.value.trim();
+            const password = registerPasswordInput.value.trim();
+
+            if (!username || !name || !password) {
+                displayMessage('所有字段都不能为空！', true);
+                return;
+            }
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, name, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) { // HTTP状态码 2xx 表示成功
+                    displayMessage(data.message);
+                    // 注册成功后，清空注册表单并提示跳转
+                    registerUsernameInput.value = '';
+                    registerNameInput.value = '';
+                    registerPasswordInput.value = '';
+                    setTimeout(() => {
+                        alert('注册成功！即将跳转到登录页面。');
+                        window.location.href = '/'; // 跳转回登录页面
+                    }, 1500); // 1.5秒后提示并跳转
+                } else {
+                    displayMessage(data.message || '注册失败，请重试。', true);
+                }
+            } catch (error) {
+                console.error('注册请求失败:', error);
+                displayMessage('网络错误或服务器无响应，请稍后再试。', true);
+            }
+        }
+
+        // --- 事件监听器 ---
+        confirmRegisterBtn.addEventListener('click', handleRegister);
+    </script>
 </body>
+</html>

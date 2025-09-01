@@ -134,4 +134,65 @@
         <button id="login-btn">登录</button>
         <a href="/register_page" class="button-link secondary-btn">注册</a>
     </div>
+        <script>
+        // --- 获取DOM元素 ---
+        const messageDisplay = document.getElementById('message-display');
+        const loginUsernameInput = document.getElementById('login-username');
+        const loginNameInput = document.getElementById('login-name');
+        const loginPasswordInput = document.getElementById('login-password');
+        const loginBtn = document.getElementById('login-btn');
+
+        // --- 辅助函数：显示消息 ---
+        function displayMessage(msg, isError = false) {
+            messageDisplay.textContent = msg;
+            messageDisplay.classList.remove('success', 'error');
+            if (msg) {
+                messageDisplay.classList.add(isError ? 'error' : 'success');
+                messageDisplay.style.display = 'block';
+            } else {
+                messageDisplay.style.display = 'none';
+            }
+        }
+
+        // --- 处理登录逻辑 ---
+        async function handleLogin() {
+            const username = loginUsernameInput.value.trim();
+            const name = loginNameInput.value.trim();
+            const password = loginPasswordInput.value.trim();
+
+            if (!username || !name || !password) {
+                displayMessage('所有字段都不能为空！', true);
+                return;
+            }
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, name, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) { // HTTP状态码 2xx 表示成功
+                    displayMessage(data.message);
+                    // 登录成功后，可以清空表单或跳转到其他页面
+                    // loginUsernameInput.value = '';
+                    // loginNameInput.value = '';
+                    // loginPasswordInput.value = '';
+                } else {
+                    // 根据后端返回的错误信息显示
+                    displayMessage(data.message || '登录失败，请重试。', true);
+                }
+            } catch (error) {
+                console.error('登录请求失败:', error);
+                displayMessage('网络错误或服务器无响应，请稍后再试。', true);
+            }
+        }
+
+        // --- 事件监听器 ---
+        loginBtn.addEventListener('click', handleLogin);
+    </script>
 </body>
+</html>
